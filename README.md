@@ -57,15 +57,6 @@ lp -d DCP_T230 -o PageSize=A4 document.pdf
 lp -d DCP_T230 -o BRMonoColor=Mono document.pdf
 ```
 
-If USB jobs complete without printing, the Linux `usblp` kernel driver can be
-used with CUPS's `parallel` backend. Customize the serial number in
-`tools/99-dcpt230-usblp.rules`, install it in `/etc/udev/rules.d/`, reload udev
-rules, and reconnect the printer. Then set the queue device with:
-
-```sh
-sudo lpadmin -p DCP_T230 -v parallel:/dev/dcpt230 -E
-```
-
 For LAN sharing, enable Avahi and run `sudo cupsctl --share-printers` and
 `sudo lpadmin -p DCP_T230 -o printer-is-shared=true`. Clients can use
 `ipp://SERVER:631/printers/DCP_T230`.
@@ -102,15 +93,29 @@ tests are skipped on macOS; the CI suite runs them on Linux.
 Physical checks covered color, grayscale, multiple pages and copies on DCP-T230.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and release preparation.
 
-Three-run median processing times, excluding mechanical printing:
+First version (Python 0.1) versus optimized Rust, measured as three-run medians.
+Raster tests include encoding, process startup and file I/O; complete PDF tests
+also include Ghostscript rendering. Network/USB delivery and mechanical printing
+are excluded.
 
-| Fixture | AMD x86_64, Rust 0.3 | Pi Zero 2 W, Rust 0.4 |
-|---|---:|---:|
-| Text/color raster encoding | 0.201 s | 0.210 s |
-| Two-page PDF, rendering and encoding | 0.877 s | 1.045 s |
+| Host | Fixture | First version | Optimized Rust | Speedup |
+|---|---|---:|---:|---:|
+| AMD x86_64 | Blank A4 encoding | 1.490 s | 0.178 s | **8.36×** |
+| AMD x86_64 | Text/color encoding | 1.473 s | 0.201 s | **7.34×** |
+| AMD x86_64 | Random-noise encoding | 1.562 s | 0.834 s | **1.87×** |
+| AMD x86_64 | Complete two-page PDF | 3.609 s | 0.877 s | **4.12×** |
+| ARMv7 (Zero 2 W) | Blank A4 encoding | 0.880 s | 0.180 s | **4.88×** |
+| ARMv7 (Zero 2 W) | Text/color encoding | 0.868 s | 0.210 s | **4.13×** |
+| ARMv7 (Zero 2 W) | Random-noise encoding | 0.869 s | 0.420 s | **2.07×** |
+| ARMv7 (Zero 2 W) | Complete two-page PDF | 6.754 s | 1.045 s | **6.46×** |
 
-These were separate sessions and builds, not a controlled CPU comparison.
-The Pi's optimized Python baseline took 2.141 s for the complete PDF job.
+AMD measurements used Rust 0.3; ARMv7 measurements used the initial Rust 0.4
+build. Comparisons within each host used the same fixtures. The hosts were
+measured in separate sessions with different software setups, so these results
+are not a controlled CPU comparison. Timings vary by document and system load;
+cache hits and the later Rust 0.4 channel-specialization build are not measured here.
+For the complete two-page color job, output fell from 52,335,543 to 103,127 bytes
+(approximately **507× smaller**), while preserving decoded pixels and 300 dpi.
 The measured complete job peaked at approximately 28 MB RAM on both hosts.
 
 ## License
