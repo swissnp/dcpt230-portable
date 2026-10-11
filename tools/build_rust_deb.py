@@ -5,6 +5,7 @@ import argparse
 import io
 from pathlib import Path
 import tarfile
+from rust_targets import TARGETS
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -30,11 +31,7 @@ ppd=ppd.replace('T230PY.PPD','T230RS.PPD')
 ppd=ppd.replace('DCP-T230 portable Python','DCP-T230 portable Rust')
 ppd=ppd.replace('*ShortNickName: "DCP-T230 portable"','*ShortNickName: "DCP-T230 Rust"')
 ppd+='\n*OpenUI *BRMonoColor/Color Mode: PickOne\n*OrderDependency: 20 AnySetup *BRMonoColor\n*DefaultBRMonoColor: FullColor\n*BRMonoColor FullColor/Color: ""\n*BRMonoColor Mono/Grayscale: ""\n*CloseUI: *BRMonoColor\n*OpenUI *BRCache/Reuse Rendered Jobs: PickOne\n*OrderDependency: 20 AnySetup *BRCache\n*DefaultBRCache: Off\n*BRCache Off/Off: ""\n*BRCache On/On: ""\n*CloseUI: *BRCache\n'
-targets={
-    'x86_64-unknown-linux-musl':('amd64','amd64'),
-    'arm-unknown-linux-musleabihf':('armhf','armv6_armhf'),
-    'armv7-unknown-linux-musleabihf':('armhf','armv7_armhf'),
-}
+targets = {target: (info["arch"], info["label"]) for target, info in TARGETS.items()}
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--target",choices=tuple(targets),help="Package one already built target")
 args=parser.parse_args()

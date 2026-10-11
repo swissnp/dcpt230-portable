@@ -12,8 +12,12 @@ case $("$T230_RUSTC" -vV) in
 esac
 T230_LINKER="$T230_SYSROOT/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
 mkdir -p "$T230_ROOT/dist/rust"
-for T230_TARGET in x86_64-unknown-linux-musl arm-unknown-linux-musleabihf armv7-unknown-linux-musleabihf; do
-    if [ "$T230_TARGET" = arm-unknown-linux-musleabihf ]; then
+if [ "$#" -eq 0 ]; then
+    set -- $(python3 "$T230_ROOT/tools/rust_targets.py")
+fi
+for T230_TARGET in "$@"; do
+    PYTHONPATH="$T230_ROOT/tools" python3 -c 'import sys; from rust_targets import TARGETS; sys.exit(0 if sys.argv[1] in TARGETS else "Unsupported target: " + sys.argv[1])' "$T230_TARGET"
+    if [ "$T230_TARGET" = arm-unknown-linux-musleabihf ] || [ "$T230_TARGET" = arm-unknown-linux-musleabi ]; then
         T230_CPU='-Ctarget-cpu=arm1176jzf-s'
     else
         T230_CPU=''
@@ -26,4 +30,3 @@ for T230_TARGET in x86_64-unknown-linux-musl arm-unknown-linux-musleabihf armv7-
         --target "$T230_TARGET" -C linker="$T230_LINKER" -C link-self-contained=yes \
         -C opt-level=2 $T230_CPU -o "$T230_ROOT/dist/rust/test-$T230_TARGET"
 done
-"$T230_ROOT/dist/rust/test-x86_64-unknown-linux-musl"

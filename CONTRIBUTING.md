@@ -7,8 +7,9 @@ credentials and deployment addresses out of pull requests.
 ## Development
 
 The filter has no Cargo dependencies. `cargo test --manifest-path rust/Cargo.toml`
-runs native Rust unit tests. The cross-build script targets x86_64 Linux and
-uses the installed rustup toolchain and bundled linker. See README for setup.
+runs native Rust unit tests. The cross-build script runs on x86_64 Linux and
+builds the targets listed in `tools/rust_targets.py` using the installed rustup
+toolchain and bundled linker. See README for setup.
 Install Ghostscript, libcups, Python 3 and qemu-user-static on Linux, then run
 `python3 tools/run_arm_regression.py` after building.
 

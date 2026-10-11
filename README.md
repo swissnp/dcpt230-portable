@@ -12,7 +12,7 @@ executables or runtime CPU emulation. Not affiliated with or endorsed by Brother
 - Lossless pixel/scanline compression, collated copies and bounded encoder memory.
 - Optional render cache with size limits, expiration and corruption checks.
 - CUPS status reporting; USB status depends on interface ownership.
-- Native amd64, ARMv6 and ARMv7 builds; an older Python color implementation.
+- Static Linux builds for 13 CPU/ABI targets; an older Python color implementation.
 
 Scanning, duplex, borderless printing, per-page media changes and reliable ink
 level reporting are not implemented. Alternative paper/media settings have not
@@ -24,13 +24,26 @@ been physically verified. This uses the traditional CUPS 2.x PPD/filter workflow
 |---|---|
 | ARMv6 Linux with hard-float runtime dependencies | `armv6_armhf` |
 | ARMv7 Linux, 32-bit OS | `armv7_armhf` |
+| ARMv5 Linux, soft-float | `armv5_armel` |
+| ARMv6 / ARMv7 Linux, soft-float | `armv6_armel` / `armv7_armel` |
+| ARM64 Linux, including Pi Zero 2 W with a 64-bit OS | `arm64` |
 | x86_64 Linux | `amd64` |
+| 32-bit x86 Linux, Pentium / Pentium 4 or newer | `i586_i386` / `i686_i386` |
+| RISC-V 64 Linux (RV64GC) | `riscv64` |
+| PowerPC64 Linux, big / little endian | `ppc64` / `ppc64el` |
+| LoongArch64 Linux (LP64D, LSX) | `loong64` |
 
-Both ARM packages have Debian architecture `armhf`; choose by CPU. ARM1176
+The ARM hard-float packages share Debian architecture `armhf`; choose by CPU. ARM1176
 emulation passed, but the original Pi/Zero W has not had a hardware test.
 Both ARM builds ran successfully on a real Zero 2 W, and its normal CUPS color
-job printed correctly. No native aarch64 release is provided. CUPS and Ghostscript
-must also support your CPU and operating system.
+job printed correctly. The additional targets have CI build and QEMU regression
+jobs; physical printing on those platforms remains unverified. CUPS and
+Ghostscript must also support your CPU and operating system.
+
+The build catalogue covers Rust tier 1/2 Linux musl targets with official
+standard libraries. Tier 3 architectures (such as MIPS and s390x musl) require
+custom toolchains and are outside this build set. See the
+[Rust platform table](https://doc.rust-lang.org/rustc/platform-support.html).
 
 ## Build and install
 
@@ -38,7 +51,7 @@ Build on x86_64 Linux with Rust 1.99.0 and its official musl targets:
 
 ```sh
 rustup toolchain install 1.99.0 --profile minimal --component rust-docs
-rustup target add --toolchain 1.99.0 x86_64-unknown-linux-musl arm-unknown-linux-musleabihf armv7-unknown-linux-musleabihf
+rustup target add --toolchain 1.99.0 $(python3 tools/rust_targets.py)
 export RUSTUP_TOOLCHAIN=1.99.0
 sh tools/build_rust.sh
 python3 tools/collect_binary_notices.py
@@ -46,6 +59,10 @@ python3 tools/build_rust_deb.py
 ```
 
 Generated packages are in `dist/`; build outputs are excluded from source archives.
+To build and package one target, pass its Rust triple to `tools/build_rust.sh`
+and use `--target TRIPLE` with `tools/run_arm_regression.py` and
+`tools/build_rust_deb.py`. CI uploads a separate artifact for each target,
+including the static filter, Debian package, license notices and source archive.
 For an ARMv6 Linux system:
 
 ```sh
@@ -84,8 +101,8 @@ python3 -m unittest discover -s tests -v
 python3 tools/run_arm_regression.py
 ```
 
-The ARM suite requires binaries produced by the build script. It runs Rust unit
-and executable tests on x86_64, ARM1176 and Cortex-A7, independently decodes
+The CPU suite requires binaries produced by the build script. It runs Rust unit
+and executable tests on each target (using QEMU for non-native CPUs), independently decodes
 rasters with libcups, and checks pixels, packet limits, grayscale, cache behavior
 and errors. No vendor software or printer is needed. Linux-specific executable
 tests are skipped on macOS; the CI suite runs them on Linux.

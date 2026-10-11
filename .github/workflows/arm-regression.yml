@@ -1,11 +1,25 @@
-name: ARM driver regression
+name: Linux CPU builds and regression
 on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:
-  regression:
+  targets:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - id: targets
+        run: echo "matrix=$(python3 tools/rust_targets.py --matrix)" >> "$GITHUB_OUTPUT"
+  regression:
+    needs: targets
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.targets.outputs.matrix) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
@@ -15,29 +29,33 @@ jobs:
       - name: Install pinned Rust compiler and targets
         run: |
           rustup toolchain install 1.99.0 --profile minimal --component rust-docs
-          rustup target add --toolchain 1.99.0 x86_64-unknown-linux-musl arm-unknown-linux-musleabihf armv7-unknown-linux-musleabihf
-      - name: Build all CPU targets
+          rustup target add --toolchain 1.99.0 ${{ matrix.target }}
+      - name: Build CPU target
         run: |
           export RUSTUP_HOME="$HOME/.rustup"
           export CARGO_HOME="$HOME/.cargo"
           export RUSTUP_TOOLCHAIN=1.99.0
-          sh tools/build_rust.sh
-      - name: Compare pixels, packets, grayscale and cache behavior on all targets
-        run: python3 tools/run_arm_regression.py
-      - name: Check source archive privacy
-        run: python3 -m unittest discover -s tests -p test_source_release.py -v
+          sh tools/build_rust.sh "${{ matrix.target }}"
+      - name: Compare pixels, packets, grayscale and cache behavior
+        run: python3 tools/run_arm_regression.py --target "${{ matrix.target }}"
+      - name: Check packaging and source archive privacy
+        run: |
+          python3 -m unittest discover -s tests -p test_source_release.py -v
+          python3 -m unittest discover -s tests -p test_rust_packages.py -v
       - name: Prepare licensed packages and source archive
         env:
           RUSTUP_TOOLCHAIN: 1.99.0
         run: |
           python3 tools/collect_binary_notices.py
-          python3 tools/build_rust_deb.py
+          python3 tools/build_rust_deb.py --target "${{ matrix.target }}"
           python3 tools/prepare_source_release.py
       - name: Upload reviewable artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: dcpt230-portable
+          name: dcpt230-portable-${{ matrix.target }}
           path: |
             dist/*.deb
+            dist/rust/dcpt230-rust-*
+            dist/rust/notices/*
             dist/*-source.tar.gz*
             arm-regression-results.json
