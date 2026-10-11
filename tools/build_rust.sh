@@ -23,10 +23,10 @@ for T230_TARGET in "$@"; do
         T230_CPU=''
     fi
     "$T230_RUSTC" --edition=2021 --crate-name dcpt230_rust "$T230_ROOT/rust/src/main.rs" \
-        --target "$T230_TARGET" -C linker="$T230_LINKER" -C link-self-contained=yes \
+        --target "$T230_TARGET" -C linker="$T230_LINKER" -C link-self-contained=yes -C target-feature=+crt-static \
         -C opt-level=3 -C lto=fat -C codegen-units=1 -C panic=abort -C strip=symbols \
         $T230_CPU -o "$T230_ROOT/dist/rust/dcpt230-rust-$T230_TARGET"
     "$T230_RUSTC" --edition=2021 --test "$T230_ROOT/rust/src/main.rs" \
-        --target "$T230_TARGET" -C linker="$T230_LINKER" -C link-self-contained=yes \
+        --target "$T230_TARGET" -C linker="$T230_LINKER" -C link-self-contained=yes -C target-feature=+crt-static \
         -C opt-level=2 $T230_CPU -o "$T230_ROOT/dist/rust/test-$T230_TARGET"
 done

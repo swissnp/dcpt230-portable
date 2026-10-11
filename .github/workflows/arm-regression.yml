@@ -29,13 +29,16 @@ jobs:
       - name: Install pinned Rust compiler and targets
         run: |
           rustup toolchain install 1.99.0 --profile minimal --component rust-docs
-          rustup target add --toolchain 1.99.0 ${{ matrix.target }}
+          rustup target add --toolchain 1.99.0 x86_64-unknown-linux-musl ${{ matrix.target }}
       - name: Build CPU target
         run: |
           export RUSTUP_HOME="$HOME/.rustup"
           export CARGO_HOME="$HOME/.cargo"
           export RUSTUP_TOOLCHAIN=1.99.0
           sh tools/build_rust.sh "${{ matrix.target }}"
+          if [ "${{ matrix.target }}" != x86_64-unknown-linux-musl ]; then
+            sh tools/build_rust.sh x86_64-unknown-linux-musl
+          fi
       - name: Compare pixels, packets, grayscale and cache behavior
         run: python3 tools/run_arm_regression.py --target "${{ matrix.target }}"
       - name: Check packaging and source archive privacy
@@ -55,7 +58,7 @@ jobs:
           name: dcpt230-portable-${{ matrix.target }}
           path: |
             dist/*.deb
-            dist/rust/dcpt230-rust-*
+            dist/rust/dcpt230-rust-${{ matrix.target }}
             dist/rust/notices/*
             dist/*-source.tar.gz*
             arm-regression-results.json
