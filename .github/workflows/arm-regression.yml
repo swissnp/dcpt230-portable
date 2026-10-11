@@ -29,7 +29,10 @@ jobs:
       - name: Install pinned Rust compiler and targets
         run: |
           rustup toolchain install 1.99.0 --profile minimal --component rust-docs
-          rustup target add --toolchain 1.99.0 x86_64-unknown-linux-musl ${{ matrix.target }}
+          rustup target add --toolchain 1.99.0 x86_64-unknown-linux-musl
+          if [ "${{ matrix.target }}" != x86_64-unknown-linux-musl ]; then
+            rustup target add --toolchain 1.99.0 "${{ matrix.target }}"
+          fi
       - name: Build CPU target
         run: |
           export RUSTUP_HOME="$HOME/.rustup"

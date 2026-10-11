@@ -152,7 +152,11 @@ impl Cache {
             return Ok(None);
         }
         let mut open=OpenOptions::new();open.read(true);
-        #[cfg(target_os="linux")] open.custom_flags(0x20000); // O_NOFOLLOW
+        // Linux PowerPC assigns O_NOFOLLOW a different bit from asm-generic.
+        #[cfg(all(target_os="linux", target_arch="powerpc64"))]
+        open.custom_flags(0x8000);
+        #[cfg(all(target_os="linux", not(target_arch="powerpc64")))]
+        open.custom_flags(0x20000); // O_NOFOLLOW
         let mut f=open.open(path)?;
         let mut prefix=[0u8;24];f.read_exact(&mut prefix)?;
         if &prefix[..8]!=b"T230C004" {return Ok(None)}
