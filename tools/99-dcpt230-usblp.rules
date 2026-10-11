@@ -1,0 +1,2 @@
+# Keep the working Linux printer-device path stable across USB reconnects.
+SUBSYSTEM=="usbmisc", KERNEL=="lp[0-9]*", ATTRS{idVendor}=="04f9", ATTRS{idProduct}=="0716", ATTRS{serial}=="REPLACE_WITH_PRINTER_SERIAL", SYMLINK+="dcpt230", GROUP="lp", MODE="0660"

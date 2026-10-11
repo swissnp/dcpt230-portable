@@ -1,0 +1,17 @@
+Portable Brother DCP-T230 driver
+
+Independent implementation; no affiliation with or endorsement by Brother.
+Brother and DCP-T230 identify the manufacturer and supported device.
+
+Acknowledgments:
+https://github.com/farafonoff/Brother-DCP-T230-MacOS-driver
+https://github.com/OpenPrinting/cups
+Consulted source was not copied into the implementation.
+
+The project MIT license covers newly written project files. It does not
+relicense Brother software, CUPS, Ghostscript, Rust or musl. Vendor files
+are not included in source distributions. CUPS and Ghostscript are separate
+operating-system dependencies.
+
+Static Rust binary packages include the installed Rust toolchain copyright
+bundle and musl copyright notice. See CONTRIBUTING.md for release requirements.

@@ -1,0 +1,43 @@
+name: ARM driver regression
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install rendering and emulation tools
+        run: sudo apt-get update && sudo apt-get install -y ghostscript libcups2t64 qemu-user-static
+      - name: Install pinned Rust compiler and targets
+        run: |
+          rustup toolchain install 1.99.0 --profile minimal --component rust-docs
+          rustup target add --toolchain 1.99.0 x86_64-unknown-linux-musl arm-unknown-linux-musleabihf armv7-unknown-linux-musleabihf
+      - name: Build all CPU targets
+        run: |
+          export RUSTUP_HOME="$HOME/.rustup"
+          export CARGO_HOME="$HOME/.cargo"
+          export RUSTUP_TOOLCHAIN=1.99.0
+          sh tools/build_rust.sh
+      - name: Compare pixels, packets, grayscale and cache behavior on all targets
+        run: python3 tools/run_arm_regression.py
+      - name: Check source archive privacy
+        run: python3 -m unittest discover -s tests -p test_source_release.py -v
+      - name: Prepare licensed packages and source archive
+        env:
+          RUSTUP_TOOLCHAIN: 1.99.0
+        run: |
+          python3 tools/collect_binary_notices.py
+          python3 tools/build_rust_deb.py
+          python3 tools/prepare_source_release.py
+      - name: Upload reviewable artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: dcpt230-portable
+          path: |
+            dist/*.deb
+            dist/*-source.tar.gz*
+            arm-regression-results.json

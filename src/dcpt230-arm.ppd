@@ -1,0 +1,68 @@
+*PPD-Adobe: "4.3"
+*FormatVersion: "4.3"
+*FileVersion: "0.2"
+*LanguageVersion: English
+*LanguageEncoding: ISOLatin1
+*PCFileName: "T230PY.PPD"
+*Manufacturer: "Brother"
+*Product: "(DCP-T230)"
+*ModelName: "Brother DCP-T230"
+*ShortNickName: "DCP-T230 portable"
+*NickName: "Brother DCP-T230 portable Python"
+*PSVersion: "(3010.000) 0"
+*LanguageLevel: "3"
+*ColorDevice: True
+*DefaultColorSpace: RGB
+*FileSystem: False
+*Throughput: "17"
+*TTRasterizer: Type42
+*cupsVersion: 1.4
+*cupsManualCopies: False
+*cupsFilter: "application/vnd.cups-pdf 0 dcpt230-arm"
+*cupsFilter: "application/vnd.cups-postscript 0 dcpt230-arm"
+*DefaultResolution: 300dpi
+*OpenUI *PageSize/Paper Size: PickOne
+*OrderDependency: 10 AnySetup *PageSize
+*DefaultPageSize: A4
+*PageSize A4: "<</PageSize [595.28 841.89]>>setpagedevice"
+*PageSize Letter: "<</PageSize [612 792]>>setpagedevice"
+*PageSize Legal: "<</PageSize [612 1008]>>setpagedevice"
+*PageSize A5: "<</PageSize [419.53 595.28]>>setpagedevice"
+*PageSize A6: "<</PageSize [297.64 419.53]>>setpagedevice"
+*CloseUI: *PageSize
+*OpenUI *PageRegion/Paper Region: PickOne
+*OrderDependency: 10 AnySetup *PageRegion
+*DefaultPageRegion: A4
+*PageRegion A4: "<</PageSize [595.28 841.89]>>setpagedevice"
+*PageRegion Letter: "<</PageSize [612 792]>>setpagedevice"
+*PageRegion Legal: "<</PageSize [612 1008]>>setpagedevice"
+*PageRegion A5: "<</PageSize [419.53 595.28]>>setpagedevice"
+*PageRegion A6: "<</PageSize [297.64 419.53]>>setpagedevice"
+*CloseUI: *PageRegion
+*DefaultImageableArea: A4
+*DefaultPaperDimension: A4
+*ImageableArea A4: "9 9 586.28 832.89"
+*PaperDimension A4: "595.28 841.89"
+*ImageableArea Letter: "9 9 603 783"
+*PaperDimension Letter: "612 792"
+*ImageableArea Legal: "9 9 603 999"
+*PaperDimension Legal: "612 1008"
+*ImageableArea A5: "9 9 410.53 586.28"
+*PaperDimension A5: "419.53 595.28"
+*ImageableArea A6: "9 9 288.64 410.53"
+*PaperDimension A6: "297.64 419.53"
+*OpenUI *BRResolution/Print Quality: PickOne
+*OrderDependency: 20 AnySetup *BRResolution
+*DefaultBRResolution: Normal
+*BRResolution Normal: ""
+*BRResolution Draft: ""
+*BRResolution Fine: ""
+*CloseUI: *BRResolution
+*OpenUI *BRMediaType/Media Type: PickOne
+*OrderDependency: 20 AnySetup *BRMediaType
+*DefaultBRMediaType: Plain
+*BRMediaType Plain: ""
+*BRMediaType Inkjet: ""
+*BRMediaType Glossy: ""
+*BRMediaType Recycled: ""
+*CloseUI: *BRMediaType
