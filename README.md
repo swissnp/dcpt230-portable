@@ -110,30 +110,37 @@ tests are skipped on macOS; the CI suite runs them on Linux.
 Physical checks covered color, grayscale, multiple pages and copies on DCP-T230.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development and release preparation.
 
-First version (Python 0.1) versus optimized Rust, measured as three-run medians.
-Raster tests include encoding, process startup and file I/O; complete PDF tests
-also include Ghostscript rendering. Network/USB delivery and mechanical printing
-are excluded.
+Brother's official Linux driver 3.6.1-1 versus the published Rust 0.4 build,
+measured on 2026-10-12 on an AMD Ryzen 9 5900X Linux server. Values are
+seven-run medians after one warmup per driver; execution order alternates.
+Both drivers use identical inputs and A4 color settings at 300 dpi, with
+render caching disabled. Decoded raster headers and pixels matched in every test.
 
-| Host | Fixture | First version | Optimized Rust | Speedup |
-|---|---|---:|---:|---:|
-| AMD x86_64 | Blank A4 encoding | 1.490 s | 0.178 s | **8.36×** |
-| AMD x86_64 | Text/color encoding | 1.473 s | 0.201 s | **7.34×** |
-| AMD x86_64 | Random-noise encoding | 1.562 s | 0.834 s | **1.87×** |
-| AMD x86_64 | Complete two-page PDF | 3.609 s | 0.877 s | **4.12×** |
-| ARMv7 (Zero 2 W) | Blank A4 encoding | 0.880 s | 0.180 s | **4.88×** |
-| ARMv7 (Zero 2 W) | Text/color encoding | 0.868 s | 0.210 s | **4.13×** |
-| ARMv7 (Zero 2 W) | Random-noise encoding | 0.869 s | 0.420 s | **2.07×** |
-| ARMv7 (Zero 2 W) | Complete two-page PDF | 6.754 s | 1.045 s | **6.46×** |
+| Fixture | Official Brother | Portable Rust | Speedup |
+|---|---:|---:|---:|
+| Blank A4 encoding | 75.8 ms | 13.9 ms | **5.46×** |
+| Text/color A4 encoding | 76.3 ms | 15.7 ms | **4.88×** |
+| Random-noise A4 encoding | 96.1 ms | 35.5 ms | **2.71×** |
+| Two-page PDF with the same renderer | 228.5 ms | 100.3 ms | **2.28×** |
 
-AMD measurements used Rust 0.3; ARMv7 measurements used the initial Rust 0.4
-build. Comparisons within each host used the same fixtures. The hosts were
-measured in separate sessions with different software setups, so these results
-are not a controlled CPU comparison. Timings vary by document and system load;
-cache hits and the later Rust 0.4 channel-specialization build are not measured here.
-For the complete two-page color job, output fell from 52,335,543 to 103,127 bytes
-(approximately **507× smaller**), while preserving decoded pixels and 300 dpi.
-The measured complete job peaked at approximately 28 MB RAM on both hosts.
+Encoding tests include process startup and file I/O. The PDF test uses the
+same Ghostscript renderer for both encoders, rather than Brother's CUPS
+wrapper. CUPS delivery, network/USB transfer and mechanical printing are
+excluded. These measurements do not establish Pi performance or physical
+printing speed.
+
+Median peak encoder memory was approximately 28 MiB for Brother versus
+0.4–0.6 MiB for Rust. Including rendering, both used approximately 27–28 MiB.
+Timings vary by document and system load.
+
+Raw trials, CPU time, memory usage and binary hashes are recorded in
+[the benchmark results](results/official-performance-2026-10-12.json).
+Reproduce on an x86_64 Linux host with Ghostscript, libcups, Python 3 and GNU
+time installed, using a locally supplied Brother driver directory:
+
+```sh
+python3 tools/benchmark_official.py --vendor-dir /opt/brother/Printers/dcpt230
+```
 
 ## License
 
