@@ -1,8 +1,14 @@
-# Portable Brother DCP-T230 printer driver
+# Brother DCP-T230 Linux driver for Raspberry Pi and other CPUs
 
-An independent CUPS 2.x driver written in Rust. It renders PDF/PostScript with
-Ghostscript and emits PJL-wrapped PWG Raster without the manufacturer's x86
-executables or runtime CPU emulation. Not affiliated with or endorsed by Brother.
+An independent, MIT-licensed Brother DCP-T230 printer driver for Linux and
+CUPS 2.x, written in Rust. Use it for USB printing on a Raspberry Pi or to
+share the printer over your local network through a CUPS print server.
+
+Native builds cover ARMv6, ARMv7, ARM64, x86 and other Linux CPUs. Color and
+grayscale printing have been tested on a Raspberry Pi Zero 2 W. The driver
+renders PDF/PostScript with Ghostscript and emits PJL-wrapped PWG Raster
+without the manufacturer's x86 executables or runtime CPU emulation.
+Not affiliated with or endorsed by Brother.
 
 ## Features
 
@@ -18,7 +24,12 @@ Scanning, duplex, borderless printing, per-page media changes and reliable ink
 level reporting are not implemented. Alternative paper/media settings have not
 been physically verified. This uses the traditional CUPS 2.x PPD/filter workflow.
 
-## Choose a build
+## Linux and Raspberry Pi compatibility
+
+[Download build artifacts from GitHub Actions](https://github.com/swissnp/dcpt230-portable/actions/workflows/arm-regression.yml).
+Each successful CPU job includes a Debian package, static binary and source
+archive. Choose the build for your installed Linux OS architecture; a 64-bit
+CPU can run a 32-bit OS.
 
 | Computer / OS | Build |
 |---|---|
@@ -45,7 +56,7 @@ standard libraries. Tier 3 architectures (such as MIPS and s390x musl) require
 custom toolchains and are outside this build set. See the
 [Rust platform table](https://doc.rust-lang.org/rustc/platform-support.html).
 
-## Build and install
+## Build and install the CUPS driver
 
 Build on x86_64 Linux with Rust 1.99.0 and its official musl targets:
 
@@ -74,9 +85,13 @@ lp -d DCP_T230 -o PageSize=A4 document.pdf
 lp -d DCP_T230 -o BRMonoColor=Mono document.pdf
 ```
 
+### Share the USB printer over the network
+
 For LAN sharing, enable Avahi and run `sudo cupsctl --share-printers` and
 `sudo lpadmin -p DCP_T230 -o printer-is-shared=true`. Clients can use
 `ipp://SERVER:631/printers/DCP_T230`.
+
+### Status and render caching
 
 Run `dcpt230-status DCP_T230` for queue status. Optional `--usb` reads port flags
 without claiming the interface; it may be unavailable when a kernel driver
@@ -147,4 +162,4 @@ python3 tools/benchmark_official.py --vendor-dir /opt/brother/Printers/dcpt230
 New project code and documentation are licensed under [MIT](LICENSE).
 See [NOTICE](NOTICE) for attribution and third-party boundaries. Original Brother
 packages, extracted executables, disassembly and local print documents are
-excluded from the public source. This setup has not published a repository.
+excluded from the public source.
